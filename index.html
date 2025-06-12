@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Upload de Arquivos - Recrutamento</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 30px;
+      color: #333;
+    }
+    .upload-section {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      padding: 30px 25px;
+      margin-bottom: 30px;
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+    }
+    .upload-section h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #444;
+    }
+    input[type="file"] {
+      display: block;
+      margin: 10px auto 20px auto;
+    }
+    button {
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    button:hover {
+      background-color: #3730a3;
+    }
+    #status {
+      margin-top: 20px;
+      color: #333;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Envio de Arquivos</h1>
+
+  <div class="upload-section">
+    <h2>Requisitos da vaga</h2>
+    <form id="formRequisitos">
+      <input type="file" id="fileRequisitos" accept=".csv, .xlsx" required />
+      <button type="submit">Enviar Requisitos</button>
+    </form>
+  </div>
+
+  <div class="upload-section">
+    <h2>Candidatos</h2>
+    <form id="formCandidatos">
+      <input type="file" id="fileCandidatos" accept=".csv, .xlsx" required />
+      <button type="submit">Enviar Candidatos</button>
+    </form>
+  </div>
+
+  <p id="status"></p>
+
+  <script>
+    const URL_REQUISITOS = "https://srdiadev-n8n-webhook.8qlb9b.easypanel.host/webhook/formulario";
+    const URL_CANDIDATOS = "https://srdiadev-n8n-webhook.8qlb9b.easypanel.host/webhook/36835167-44f6-45fb-b72d-71f9e3694af8";
+
+    async function enviarArquivo(file, url, tipo) {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const status = document.getElementById("status");
+      status.textContent = `Enviando arquivo de ${tipo}...`;
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          body: formData
+        });
+        if (res.ok) {
+          status.textContent = `Arquivo de ${tipo} enviado com sucesso!`;
+        } else {
+          status.textContent = `Erro ao enviar ${tipo}: ${res.statusText}`;
+        }
+      } catch (err) {
+        status.textContent = `Erro de conexão ao enviar ${tipo}: ${err.message}`;
+      }
+    }
+
+    document.getElementById("formRequisitos").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const file = document.getElementById("fileRequisitos").files[0];
+      if (file) enviarArquivo(file, URL_REQUISITOS, "requisitos");
+    });
+
+    document.getElementById("formCandidatos").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const file = document.getElementById("fileCandidatos").files[0];
+      if (file) enviarArquivo(file, URL_CANDIDATOS, "candidatos");
+    });
+  </script>
+</body>
+</html>
